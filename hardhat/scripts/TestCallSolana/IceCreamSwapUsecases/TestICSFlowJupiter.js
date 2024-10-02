@@ -96,10 +96,11 @@ async function main() {
 
     const asLegacyTransaction = true;
     const onlyDirectRoutes = false;
+    const maxAccounts = 13;
 
     // prepare Jupiter quote
     const quoteResponse = await (
-        await fetch('https://quote-api.jup.ag/v6/quote?asLegacyTransaction='+asLegacyTransaction+'&onlyDirectRoutes='+onlyDirectRoutes+'&inputMint=' + swapConfig.TokenA.SVM + '&outputMint=' + swapConfig.TokenB.SVM + '&amount=' + (swapConfig.TokenAAmount * 10 ** swapConfig.TokenADecimals) + '&slippageBps=' + swapConfig.slippage)
+        await fetch('https://quote-api.jup.ag/v6/quote?asLegacyTransaction='+asLegacyTransaction+'&onlyDirectRoutes='+onlyDirectRoutes+'&inputMint=' + swapConfig.TokenA.SVM + '&outputMint=' + swapConfig.TokenB.SVM + '&amount=' + (swapConfig.TokenAAmount * 10 ** swapConfig.TokenADecimals) + '&slippageBps=' + swapConfig.slippage + '&maxAccounts=' + maxAccounts + '&dexes=Raydium,Whirlpool')
     ).json();
     console.log(quoteResponse, 'quoteResponse');
 
@@ -122,6 +123,8 @@ async function main() {
     ).json();
     const swapTransactionBuf = Buffer.from(swapTransaction, 'base64');
     const jupiterSwap = web3.Transaction.from(swapTransactionBuf);
+
+    console.log(`Successfully got quote with ${jupiterSwap.instructions[jupiterSwap.instructions.length - 1].keys.length} accounts`)
 
     console.log('\nBroadcast Jupiter swap TokenA -> TokenB ... ');
     tx = await TestICSFlow.connect(user1).jupiterSwap(
